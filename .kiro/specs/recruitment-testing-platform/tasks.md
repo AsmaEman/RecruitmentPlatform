@@ -75,44 +75,44 @@ The implementation prioritizes getting a working MVP with essential features fir
 - [x] 4. Checkpoint - Core ATS functionality complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 5. Implement resume parsing service
-  - [-] 5.1 Set up NLP pipeline with spaCy
+- [x] 5. Implement resume parsing service
+  - [x] 5.1 Set up NLP pipeline with spaCy
     - Install and configure spaCy with English language model
     - Create custom NER model for resume entities
     - Set up document processing pipeline for PDF/DOCX/TXT
     - _Requirements: 2.1, 2.2, 2.6_
 
-  - [ ] 5.2 Write property test for multi-format parsing
+  - [x] 5.2 Write property test for multi-format parsing
     - **Property 4: Multi-format Parsing Consistency**
     - **Validates: Requirements 2.1, 2.2**
 
-  - [ ] 5.3 Implement OCR processing for scanned documents
+  - [x] 5.3 Implement OCR processing for scanned documents
     - Integrate Tesseract.js for image-to-text conversion
     - Add file type detection and routing logic
     - Implement quality assessment for OCR results
     - _Requirements: 2.3_
 
-  - [ ] 5.4 Write property test for OCR round-trip consistency
+  - [x] 5.4 Write property test for OCR round-trip consistency
     - **Property 5: OCR Processing Round-trip**
     - **Validates: Requirements 2.3**
 
-  - [ ] 5.5 Create skill normalization and taxonomy system
+  - [x] 5.5 Create skill normalization and taxonomy system
     - Build skill taxonomy database with synonyms
     - Implement skill extraction and normalization logic
     - Add confidence scoring for extracted entities
     - _Requirements: 2.7_
 
-  - [ ] 5.6 Write property test for skill normalization
+  - [x] 5.6 Write property test for skill normalization
     - **Property 7: Skill Normalization Consistency**
     - **Validates: Requirements 2.7**
 
-  - [ ] 5.7 Implement parsing accuracy monitoring
+  - [x] 5.7 Implement parsing accuracy monitoring
     - Add confidence scoring and quality metrics
     - Create manual review flagging system
     - Implement accuracy tracking and reporting
     - _Requirements: 2.4, 2.5_
 
-  - [ ] 5.8 Write property test for parsing accuracy threshold
+  - [x] 5.8 Write property test for parsing accuracy threshold
     - **Property 6: Parsing Accuracy Threshold**
     - **Validates: Requirements 2.4**
 
