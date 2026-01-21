@@ -36,6 +36,8 @@ class TestWorkflowService:
             role="recruiter"
         )
         self.db.add(self.user)
+        self.db.commit()
+        self.db.refresh(self.user)
         
         # Create test candidate
         self.candidate = Candidate(
@@ -44,6 +46,8 @@ class TestWorkflowService:
             last_name="Candidate"
         )
         self.db.add(self.candidate)
+        self.db.commit()
+        self.db.refresh(self.candidate)
         
         # Create test job
         self.job = JobPosting(
@@ -55,6 +59,8 @@ class TestWorkflowService:
             created_by=self.user.id
         )
         self.db.add(self.job)
+        self.db.commit()
+        self.db.refresh(self.job)
         
         # Create test application
         self.application = Application(
@@ -63,11 +69,7 @@ class TestWorkflowService:
             status="applied"
         )
         self.db.add(self.application)
-        
         self.db.commit()
-        self.db.refresh(self.user)
-        self.db.refresh(self.candidate)
-        self.db.refresh(self.job)
         self.db.refresh(self.application)
         
         self.workflow_service = WorkflowService(self.db)
@@ -325,6 +327,8 @@ class TestWorkflowService:
             last_name="Candidate2"
         )
         self.db.add(candidate2)
+        self.db.commit()
+        self.db.refresh(candidate2)
         
         application2 = Application(
             candidate_id=candidate2.id,
@@ -333,7 +337,6 @@ class TestWorkflowService:
         )
         self.db.add(application2)
         self.db.commit()
-        self.db.refresh(candidate2)
         self.db.refresh(application2)
         
         # Create workflow stages

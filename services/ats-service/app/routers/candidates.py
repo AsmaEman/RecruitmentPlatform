@@ -24,7 +24,7 @@ async def create_candidate(candidate_data: CandidateCreate, db: Session = Depend
                 detail="Candidate with this email already exists"
             )
         
-        db_candidate = Candidate(**candidate_data.dict())
+        db_candidate = Candidate(**candidate_data.model_dump())
         db.add(db_candidate)
         db.commit()
         db.refresh(db_candidate)
@@ -49,22 +49,22 @@ async def create_candidate(candidate_data: CandidateCreate, db: Session = Depend
 
 @router.get("/count", response_model=dict)
 async def count_candidates(
-    status: Optional[str] = Query(None, description="Filter by candidate status"),
+    candidate_status: Optional[str] = Query(None, alias="status", description="Filter by candidate status"),
     db: Session = Depends(get_db)
 ):
     """Get total count of candidates with optional filtering"""
     try:
         query = db.query(Candidate)
         
-        if status:
+        if candidate_status:
             # Validate status value
             valid_statuses = ['active', 'inactive', 'hired', 'rejected']
-            if status not in valid_statuses:
+            if candidate_status not in valid_statuses:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
                 )
-            query = query.filter(Candidate.status == status)
+            query = query.filter(Candidate.status == candidate_status)
         
         total_count = query.count()
         return {"total": total_count}
@@ -82,22 +82,22 @@ async def count_candidates(
 async def list_candidates(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
-    status: Optional[str] = Query(None, description="Filter by candidate status"),
+    candidate_status: Optional[str] = Query(None, alias="status", description="Filter by candidate status"),
     db: Session = Depends(get_db)
 ):
     """List candidates with pagination and filtering"""
     try:
         query = db.query(Candidate)
         
-        if status:
+        if candidate_status:
             # Validate status value
             valid_statuses = ['active', 'inactive', 'hired', 'rejected']
-            if status not in valid_statuses:
+            if candidate_status not in valid_statuses:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
                 )
-            query = query.filter(Candidate.status == status)
+            query = query.filter(Candidate.status == candidate_status)
         
         # Order by creation date (newest first)
         query = query.order_by(Candidate.created_at.desc())
@@ -152,7 +152,7 @@ async def update_candidate(
                     detail="Email already exists for another candidate"
                 )
         
-        update_data = candidate_data.dict(exclude_unset=True)
+        update_data = candidate_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(candidate, field, value)
         

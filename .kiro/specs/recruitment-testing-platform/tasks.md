@@ -75,8 +75,8 @@ The implementation prioritizes getting a working MVP with essential features fir
 - [x] 4. Checkpoint - Core ATS functionality complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement resume parsing service
-  - [ ] 5.1 Set up NLP pipeline with spaCy
+- [-] 5. Implement resume parsing service
+  - [-] 5.1 Set up NLP pipeline with spaCy
     - Install and configure spaCy with English language model
     - Create custom NER model for resume entities
     - Set up document processing pipeline for PDF/DOCX/TXT

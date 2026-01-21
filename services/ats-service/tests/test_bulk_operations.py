@@ -149,9 +149,9 @@ class TestBulkOperations:
             assert application.status == "screening"
         
         # Verify status history was created for each application
-        for application in self.applications:
+        for app_id in self.application_ids:
             history = self.db.query(ApplicationStatusHistory).filter(
-                ApplicationStatusHistory.application_id == application.id
+                ApplicationStatusHistory.application_id == app_id
             ).first()
             
             assert history is not None
@@ -209,14 +209,21 @@ class TestBulkOperations:
             assert str(invalid_id) in error_messages
         
         # Verify valid applications were updated
-        for i in range(3):
-            self.db.refresh(self.applications[i])
-            assert self.applications[i].status == "rejected"
+        updated_applications = self.db.query(Application).filter(
+            Application.id.in_(valid_ids)
+        ).all()
+        
+        for application in updated_applications:
+            assert application.status == "rejected"
         
         # Verify remaining applications were not updated
-        for i in range(3, 5):
-            self.db.refresh(self.applications[i])
-            assert self.applications[i].status == "applied"
+        remaining_app_ids = self.application_ids[3:5]
+        remaining_applications = self.db.query(Application).filter(
+            Application.id.in_(remaining_app_ids)
+        ).all()
+        
+        for application in remaining_applications:
+            assert application.status == "applied"
     
     @pytest.mark.asyncio
     async def test_bulk_stage_movement(self):
@@ -263,13 +270,16 @@ class TestBulkOperations:
         assert progress["failed"] == 0
         
         # Verify applications were moved to correct stage
-        for i in range(3):
-            self.db.refresh(self.applications[i])
-            assert self.applications[i].status == "initial_screening"
+        updated_applications = self.db.query(Application).filter(
+            Application.id.in_(application_ids)
+        ).all()
+        
+        for application in updated_applications:
+            assert application.status == "initial_screening"
             
             # Verify stage transition was created
             current_transition = workflow_service.get_current_stage_transition(
-                self.applications[i].id
+                application.id
             )
             assert current_transition is not None
             assert current_transition.stage_id == screening_stage.id
@@ -475,7 +485,7 @@ class TestBulkOperations:
         """Test integration with notification service during bulk operations"""
         # Requirements: 1.5 - Notification integration with bulk operations
         
-        with patch('app.services.notification_service.NotificationService') as mock_notification_service:
+        with patch('app.routers.applications.NotificationService') as mock_notification_service:
             # Setup mock
             mock_service_instance = Mock()
             mock_notification_service.return_value = mock_service_instance
