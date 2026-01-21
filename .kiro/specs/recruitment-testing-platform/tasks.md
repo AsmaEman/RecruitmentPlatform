@@ -15,38 +15,39 @@ The implementation prioritizes getting a working MVP with essential features fir
   - Set up API Gateway with basic routing
   - _Requirements: 1.1, 10.1, 10.2, 11.1_
 
-- [ ] 2. Implement core ATS service
-  - [ ] 2.1 Create candidate and job posting data models
+- [x] 2. Implement core ATS service
+  - [x] 2.1 Create candidate and job posting data models
     - Implement PostgreSQL schema for candidates, jobs, applications tables
     - Create FastAPI models with Pydantic validation
     - Set up database migrations and connection pooling
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 2.2 Write property test for candidate data persistence
+  - [x] 2.2 Write property test for candidate data persistence
     - **Property 1: Application Storage Consistency**
     - **Validates: Requirements 1.1**
 
-  - [ ] 2.3 Implement candidate management API endpoints
+  - [x] 2.3 Implement candidate management API endpoints
     - Create CRUD operations for candidates (POST, GET, PUT, DELETE)
     - Add input validation and error handling
     - Implement pagination for candidate listings
     - _Requirements: 1.1, 1.6_
 
-  - [ ] 2.4 Write unit tests for candidate API endpoints
+  - [x] 2.4 Write unit tests for candidate API endpoints
     - Test successful candidate creation and retrieval
     - Test validation errors and edge cases
     - Test pagination functionality
     - _Requirements: 1.1, 1.6_
 
-  - [ ] 2.5 Implement job posting management
+  - [x] 2.5 Implement job posting management
     - Create job posting CRUD operations
     - Add support for custom recruitment pipeline stages
     - Implement job posting search and filtering
     - _Requirements: 1.4, 1.6_
 
-  - [ ] 2.6 Write property test for status change audit logging
+  - [x] 2.6 Write property test for status change audit logging
     - **Property 2: Status Change Audit Trail**
     - **Validates: Requirements 1.2**
+    - **PBT Status: FAILED** - SQLite UUID compatibility issue (SQLiteTypeCompiler can't render element of type UUID)
 
 - [ ] 3. Implement application workflow system
   - [ ] 3.1 Create application tracking functionality

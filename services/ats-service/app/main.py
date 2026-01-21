@@ -14,8 +14,9 @@ from .core.security import verify_token
 
 load_dotenv()
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Create database tables only if not in test environment
+if os.getenv("DATABASE_URL", "").find("test.db") == -1:
+    Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Recruitment ATS Service",

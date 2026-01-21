@@ -28,7 +28,7 @@ class Candidate(Base):
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     phone = Column(String(20))
-    location = Column(String)  # Will be handled as geography in PostgreSQL
+    location = Column(Text)  # Store location as text (can be enhanced with PostGIS later)
     resume_url = Column(Text)
     parsed_resume = Column(JSONB)
     status = Column(String(50), default="active", index=True)
@@ -47,7 +47,7 @@ class JobPosting(Base):
     description = Column(Text, nullable=False)
     requirements = Column(JSONB, nullable=False)
     department = Column(String(100), nullable=False, index=True)
-    location = Column(String)  # Will be handled as geography in PostgreSQL
+    location = Column(Text)  # Store location as text (can be enhanced with PostGIS later)
     employment_type = Column(String(50), nullable=False)
     salary_range = Column(JSONB)
     status = Column(String(50), default="active", index=True)
