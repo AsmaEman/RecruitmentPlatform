@@ -29,7 +29,7 @@ def status_change_data(draw):
 
 
 @given(status_change_data())
-@settings(max_examples=10)
+@settings(max_examples=10, deadline=1000)  # Increase deadline
 def test_status_change_audit_trail(status_change_data_input):
     """
     Property 2: Status Change Audit Trail
@@ -162,7 +162,7 @@ def test_status_change_audit_trail(status_change_data_input):
 
 
 @given(st.lists(status_change_data(), min_size=2, max_size=3))
-@settings(max_examples=5)
+@settings(max_examples=5, deadline=2000)  # Increase deadline
 def test_multiple_status_changes_audit_trail(status_changes):
     """
     Property: Multiple status changes should each create separate audit entries

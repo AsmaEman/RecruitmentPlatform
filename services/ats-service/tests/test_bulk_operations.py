@@ -42,6 +42,8 @@ class TestBulkOperations:
             role="recruiter"
         )
         self.db.add(self.user)
+        self.db.commit()
+        self.db.refresh(self.user)
         
         # Create test candidates
         self.candidates = []
@@ -54,6 +56,10 @@ class TestBulkOperations:
             self.candidates.append(candidate)
             self.db.add(candidate)
         
+        self.db.commit()
+        for candidate in self.candidates:
+            self.db.refresh(candidate)
+        
         # Create test job
         self.job = JobPosting(
             title="Bulk Test Job",
@@ -64,9 +70,12 @@ class TestBulkOperations:
             created_by=self.user.id
         )
         self.db.add(self.job)
+        self.db.commit()
+        self.db.refresh(self.job)
         
         # Create test applications
         self.applications = []
+        self.application_ids = []  # Store IDs separately
         for candidate in self.candidates:
             application = Application(
                 candidate_id=candidate.id,
@@ -78,9 +87,10 @@ class TestBulkOperations:
         
         self.db.commit()
         
-        # Refresh all objects
-        for obj in [self.user, self.job] + self.candidates + self.applications:
-            self.db.refresh(obj)
+        # Refresh all applications and store their IDs
+        for application in self.applications:
+            self.db.refresh(application)
+            self.application_ids.append(application.id)
     
     def teardown_method(self):
         """Clean up after each test method"""
@@ -95,7 +105,7 @@ class TestBulkOperations:
         # Requirements: 1.5 - Bulk status update functionality
         
         operation_id = "test_bulk_update_001"
-        application_ids = [app.id for app in self.applications]
+        application_ids = self.application_ids  # Use stored IDs
         
         bulk_data = BulkStatusUpdate(
             application_ids=application_ids,
@@ -131,8 +141,11 @@ class TestBulkOperations:
         assert progress["completed_at"] is not None
         
         # Verify all applications were updated
-        for application in self.applications:
-            self.db.refresh(application)
+        updated_applications = self.db.query(Application).filter(
+            Application.id.in_(self.application_ids)
+        ).all()
+        
+        for application in updated_applications:
             assert application.status == "screening"
         
         # Verify status history was created for each application

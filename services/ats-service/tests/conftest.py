@@ -89,5 +89,4 @@ def db_session():
 @pytest.fixture(scope="function")
 def client():
     """Create a test client"""
-    with TestClient(app) as test_client:
-        yield test_client
+    return TestClient(app)
