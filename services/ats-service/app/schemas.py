@@ -119,6 +119,35 @@ class BulkStatusUpdate(BaseModel):
     changed_by: UUID
     reason: Optional[str] = None
 
+class BulkOperationProgress(BaseModel):
+    operation_id: str
+    status: str  # "in_progress", "completed", "failed"
+    total: int
+    processed: int
+    successful: int
+    failed: int
+    progress_percentage: float
+    errors: List[str]
+    started_at: Optional[datetime]
+    completed_at: Optional[datetime]
+
+class BulkRejectRequest(BaseModel):
+    application_ids: List[UUID]
+    rejection_reason: str
+    changed_by: UUID
+
+class BulkApproveRequest(BaseModel):
+    application_ids: List[UUID]
+    approval_reason: str
+    changed_by: UUID
+    next_stage: str = "interview"
+
+class BulkStageMovementRequest(BaseModel):
+    application_ids: List[UUID]
+    stage_id: UUID
+    changed_by: UUID
+    reason: Optional[str] = None
+
 class ApplicationResponse(BaseModel):
     id: UUID
     candidate_id: UUID
@@ -127,6 +156,65 @@ class ApplicationResponse(BaseModel):
     match_score: Optional[Decimal]
     applied_at: datetime
     updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Workflow schemas
+class WorkflowStageCreate(BaseModel):
+    job_id: UUID
+    name: str
+    description: Optional[str] = None
+    order_index: int
+    sla_hours: int = 72
+    auto_advance_rules: Optional[Dict[str, Any]] = None
+
+class WorkflowStageResponse(BaseModel):
+    id: UUID
+    job_id: UUID
+    name: str
+    description: Optional[str]
+    order_index: int
+    sla_hours: int
+    is_active: bool
+    auto_advance_rules: Optional[Dict[str, Any]]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class StageTransitionCreate(BaseModel):
+    application_id: UUID
+    stage_id: UUID
+    notes: Optional[str] = None
+
+class StageTransitionResponse(BaseModel):
+    id: UUID
+    application_id: UUID
+    stage_id: UUID
+    entered_at: datetime
+    exited_at: Optional[datetime]
+    sla_deadline: Optional[datetime]
+    is_escalated: bool
+    escalated_at: Optional[datetime]
+    escalated_to: Optional[UUID]
+    notes: Optional[str]
+    
+    class Config:
+        from_attributes = True
+
+class SLAEscalationResponse(BaseModel):
+    id: UUID
+    application_id: UUID
+    stage_transition_id: UUID
+    escalation_type: str
+    escalated_to: UUID
+    escalation_reason: Optional[str]
+    is_resolved: bool
+    resolved_at: Optional[datetime]
+    resolved_by: Optional[UUID]
+    created_at: datetime
     
     class Config:
         from_attributes = True

@@ -5,12 +5,14 @@ from sqlalchemy.orm import Session
 import redis
 from elasticsearch import Elasticsearch
 import os
+import asyncio
 from dotenv import load_dotenv
 
 from .database import engine, get_db
 from .models import Base
-from .routers import candidates, jobs, applications, auth
+from .routers import candidates, jobs, applications, auth, workflow
 from .core.security import verify_token
+from .services.sla_monitor import sla_monitor
 
 load_dotenv()
 
@@ -97,6 +99,7 @@ app.include_router(auth.router, prefix="/auth", tags=["authentication"])
 app.include_router(candidates.router, prefix="/candidates", tags=["candidates"])
 app.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 app.include_router(applications.router, prefix="/applications", tags=["applications"])
+app.include_router(workflow.router, prefix="/workflow", tags=["workflow"])
 
 @app.get("/")
 async def root():
@@ -108,9 +111,15 @@ async def startup_event():
     """Initialize services on startup"""
     app.state.redis = redis_client
     app.state.elasticsearch = es_client
+    
+    # Start SLA monitoring service
+    asyncio.create_task(sla_monitor.start_monitoring())
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown"""
     redis_client.close()
     es_client.close()
+    
+    # Stop SLA monitoring service
+    sla_monitor.stop_monitoring()
