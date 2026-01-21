@@ -1,0 +1,181 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - ats-service
+    networks:
+      - recruitment-network
+
+  # ATS Service (FastAPI)
+  ats-service:
+    build:
+      context: ./services/ats-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/recruitment_db
+      - REDIS_URL=redis://redis:6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+    networks:
+      - recruitment-network
+
+  # Resume Parser Service
+  resume-service:
+    build:
+      context: ./services/resume-service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/recruitment_db
+      - S3_BUCKET=recruitment-resumes
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_ENDPOINT_URL=http://minio:9000
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - recruitment-network
+
+  # Matching Service
+  matching-service:
+    build:
+      context: ./services/matching-service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/recruitment_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - recruitment-network
+
+  # Testing Service (Node.js)
+  testing-service:
+    build:
+      context: ./services/testing-service
+      dockerfile: Dockerfile
+    ports:
+      - "8004:3000"
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017/recruitment_tests
+      - REDIS_URL=redis://redis:6379
+      - S3_BUCKET=recruitment-tests
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_ENDPOINT_URL=http://minio:9000
+    depends_on:
+      - mongo
+      - redis
+      - minio
+    networks:
+      - recruitment-network
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8000"
+    environment:
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+    networks:
+      - recruitment-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=recruitment_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - recruitment-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - recruitment-network
+
+  # MongoDB for test sessions
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - recruitment-network
+
+  # Elasticsearch for search
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - recruitment-network
+
+  # MinIO for S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - recruitment-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data:
+  elasticsearch_data:
+  minio_data:
+
+networks:
+  recruitment-network:
+    driver: bridge
