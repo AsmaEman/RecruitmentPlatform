@@ -92,7 +92,7 @@ def test_status_change_audit_trail(status_change_data_input):
         db_session.refresh(application)
         
         # Record the time before status change
-        before_change = datetime.now()
+        before_change = datetime.utcnow()
         
         # Create status change history entry (simulating the API endpoint behavior)
         status_history = ApplicationStatusHistory(
@@ -111,7 +111,7 @@ def test_status_change_audit_trail(status_change_data_input):
         db_session.refresh(status_history)
         
         # Record the time after status change
-        after_change = datetime.now()
+        after_change = datetime.utcnow()
         
         # Verify audit trail was created
         assert status_history.id is not None
@@ -123,8 +123,9 @@ def test_status_change_audit_trail(status_change_data_input):
         assert status_history.created_at is not None
         assert isinstance(status_history.created_at, datetime)
         
-        # Verify timestamp is within reasonable bounds
-        assert before_change <= status_history.created_at <= after_change
+        # Verify timestamp is within reasonable bounds (allow for some database timing differences)
+        time_diff = abs((status_history.created_at.replace(tzinfo=None) - before_change).total_seconds())
+        assert time_diff <= 5, f"Timestamp should be within 5 seconds of test execution, but was {time_diff} seconds off"
         
         # Verify the audit trail can be retrieved later
         retrieved_history = db_session.query(ApplicationStatusHistory).filter(

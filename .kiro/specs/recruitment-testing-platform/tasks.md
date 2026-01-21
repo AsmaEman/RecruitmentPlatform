@@ -72,7 +72,7 @@ The implementation prioritizes getting a working MVP with essential features fir
     - Test bulk operation functionality
     - _Requirements: 1.2, 1.5, 1.7_
 
-- [-] 4. Checkpoint - Core ATS functionality complete
+- [x] 4. Checkpoint - Core ATS functionality complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Implement resume parsing service
